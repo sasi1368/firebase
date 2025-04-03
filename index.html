@@ -1,78 +1,75 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Phone Authentication</title>
-  <!-- استفاده از CDN Firebase که به صورت ماژول ES6 بارگذاری می‌شود -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    
-    // تنظیمات Firebase
+  <title>ورود با شماره تلفن</title>
+  <!-- بارگذاری Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-analytics.js"></script>
+  
+  <!-- بارگذاری reCAPTCHA SDK -->
+  <script src="https://www.gstatic.com/recaptcha/releases/recaptcha__en.js"></script>
+</head>
+<body>
+  <h1>ورود با شماره تلفن</h1>
+
+  <!-- فرم ورود -->
+  <form id="loginForm">
+    <label for="phoneNumber">شماره تلفن:</label>
+    <input type="text" id="phoneNumber" placeholder="شماره تلفن خود را وارد کنید" required>
+    <br>
+    <div id="recaptcha-container"></div>
+    <br>
+    <button type="button" onclick="signInWithPhoneNumber()">ورود</button>
+  </form>
+
+  <script>
+    // پیکربندی Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAVVcAhyYavi7T6y5rkkKkPRDKC02CSAs8",
       authDomain: "ghorekeshibig.firebaseapp.com",
       projectId: "ghorekeshibig",
       storageBucket: "ghorekeshibig.firebasestorage.app",
       messagingSenderId: "852435077441",
-      appId: "1:852435077441:web:d6a01fdadc63477776b9c0",
+      appId: "1:852435077441:web:d6a01fdadc63477776b9c0"
     };
 
-    // راه‌اندازی Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    let confirmationResult;
+    // بارگذاری Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
 
-    window.sendVerificationCode = function () {
-      const phoneNumber = document.getElementById('phoneNumber').value;
-      
-      if (!phoneNumber) {
-        alert('Please enter a phone number');
-        return;
-      }
-
-      const appVerifier = new RecaptchaVerifier('sendVerificationCode', {
-        size: 'invisible',  // نمایش recaptcha به صورت پنهان
-        callback: (response) => {
-          console.log('Recaptcha verified');
+    // بارگذاری reCAPTCHA و آماده کردن آن
+    window.onload = function() {
+      const recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+        size: 'invisible',
+        callback: function(response) {
+          console.log("reCAPTCHA verified successfully.");
         }
-      }, auth);
-
-      signInWithPhoneNumber(auth, phoneNumber, appVerifier)
-        .then((result) => {
-          confirmationResult = result;
-          alert('OTP sent! Please check your phone.');
-        })
-        .catch((error) => {
-          console.error('Error during phone number sign-in:', error);
-        });
-    };
-
-    window.verifyOTP = function () {
-      const otp = document.getElementById('otp').value;
+      });
       
-      if (!otp) {
-        alert('Please enter the OTP');
-        return;
-      }
-
-      confirmationResult.confirm(otp)
-        .then((result) => {
-          alert('Login successful!');
-          window.location.href = "dashboard.html";  // انتقال به صفحه جدید
-        })
-        .catch((error) => {
-          console.error('Error during OTP verification:', error);
-        });
+      recaptchaVerifier.render().then(function(widgetId) {
+        window.recaptchaWidgetId = widgetId;
+      });
     };
+
+    // ورود با شماره تلفن
+    function signInWithPhoneNumber() {
+      const phoneNumber = document.getElementById('phoneNumber').value;
+
+      // ارسال درخواست برای تأیید شماره تلفن
+      const appVerifier = window.recaptchaWidgetId;
+      auth.signInWithPhoneNumber(phoneNumber, appVerifier)
+        .then(function(confirmationResult) {
+          // در صورتی که وارد شوید، کاربر را به صفحه جدید هدایت کنید
+          window.location.href = "dashboard.html";  // تغییر مسیر به صفحه بعدی
+        })
+        .catch(function(error) {
+          console.error("Error during phone number sign-in:", error.message);
+          alert("خطا در ورود. لطفاً دوباره تلاش کنید.");
+        });
+    }
   </script>
-</head>
-<body>
-  <h2>Login with Phone Number</h2>
-  <input type="text" id="phoneNumber" placeholder="Enter your phone number" />
-  <button id="sendVerificationCode" onclick="sendVerificationCode()">Send OTP</button>
-  <input type="text" id="otp" placeholder="Enter OTP" />
-  <button onclick="verifyOTP()">Verify OTP</button>
 </body>
 </html>
