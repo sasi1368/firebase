@@ -4,13 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ورود با شماره تلفن</title>
-  <!-- بارگذاری Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-analytics.js"></script>
-  
+
+  <!-- بارگذاری Firebase SDK (نسخه 8) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
   <!-- بارگذاری reCAPTCHA SDK -->
-  <script src="https://www.gstatic.com/recaptcha/releases/recaptcha__en.js"></script>
+  <script src="https://www.gstatic.com/recaptcha/api.js?render=explicit" async defer></script>
 </head>
 <body>
   <h1>ورود با شماره تلفن</h1>
@@ -37,7 +37,7 @@
     };
 
     // بارگذاری Firebase
-    const app = firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
     // بارگذاری reCAPTCHA و آماده کردن آن
