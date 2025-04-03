@@ -4,19 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Phone Authentication</title>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js"></script>
-</head>
-<body>
-  <h2>Login with Phone Number</h2>
-  <input type="text" id="phoneNumber" placeholder="Enter your phone number" />
-  <button onclick="sendVerificationCode()">Send OTP</button>
-  <input type="text" id="otp" placeholder="Enter OTP" />
-  <button onclick="verifyOTP()">Verify OTP</button>
-
-  <script>
-    // Firebase configuration
+  <!-- استفاده از CDN Firebase که به صورت ماژول ES6 بارگذاری می‌شود -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    
+    // تنظیمات Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAVVcAhyYavi7T6y5rkkKkPRDKC02CSAs8",
       authDomain: "ghorekeshibig.firebaseapp.com",
@@ -26,13 +19,12 @@
       appId: "1:852435077441:web:d6a01fdadc63477776b9c0",
     };
 
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-
+    // راه‌اندازی Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     let confirmationResult;
 
-    function sendVerificationCode() {
+    window.sendVerificationCode = function () {
       const phoneNumber = document.getElementById('phoneNumber').value;
       
       if (!phoneNumber) {
@@ -40,14 +32,14 @@
         return;
       }
 
-      const appVerifier = new firebase.auth.RecaptchaVerifier('sendVerificationCode', {
+      const appVerifier = new RecaptchaVerifier('sendVerificationCode', {
         size: 'invisible',  // نمایش recaptcha به صورت پنهان
         callback: (response) => {
           console.log('Recaptcha verified');
         }
-      });
+      }, auth);
 
-      auth.signInWithPhoneNumber(phoneNumber, appVerifier)
+      signInWithPhoneNumber(auth, phoneNumber, appVerifier)
         .then((result) => {
           confirmationResult = result;
           alert('OTP sent! Please check your phone.');
@@ -55,9 +47,9 @@
         .catch((error) => {
           console.error('Error during phone number sign-in:', error);
         });
-    }
+    };
 
-    function verifyOTP() {
+    window.verifyOTP = function () {
       const otp = document.getElementById('otp').value;
       
       if (!otp) {
@@ -73,7 +65,14 @@
         .catch((error) => {
           console.error('Error during OTP verification:', error);
         });
-    }
+    };
   </script>
+</head>
+<body>
+  <h2>Login with Phone Number</h2>
+  <input type="text" id="phoneNumber" placeholder="Enter your phone number" />
+  <button id="sendVerificationCode" onclick="sendVerificationCode()">Send OTP</button>
+  <input type="text" id="otp" placeholder="Enter OTP" />
+  <button onclick="verifyOTP()">Verify OTP</button>
 </body>
 </html>
