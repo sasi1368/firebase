@@ -5,15 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Firebase Phone Authentication</title>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.18.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.18.0/firebase-auth.js"></script>
+  <!-- Firebase SDK (نسخه 8.10.0 برای مرورگر) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
   <!-- reCAPTCHA SDK -->
   <script src="https://www.gstatic.com/recaptcha/api.js?render=explicit"></script>
 
   <style>
-    /* ساده سازی استایل */
     #recaptcha-container {
       margin-top: 20px;
     }
@@ -23,60 +22,58 @@
 
   <h2>Login with Phone Number</h2>
 
-  <!-- فرم وارد کردن شماره تلفن -->
   <input type="text" id="phoneNumber" placeholder="Enter phone number" />
   <button onclick="sendVerificationCode()">Send OTP</button>
 
-  <!-- عنصر برای reCAPTCHA -->
   <div id="recaptcha-container"></div>
 
   <script>
-    // پیکربندی Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyAVVcAhyYavi7T6y5rkkKkPRDKC02CSAs8",
-      authDomain: "ghorekeshibig.firebaseapp.com",
-      projectId: "ghorekeshibig",
-      storageBucket: "ghorekeshibig.firebasestorage.app",
-      messagingSenderId: "852435077441",
-      appId: "1:852435077441:web:d6a01fdadc63477776b9c0"
-    };
+    window.onload = function() {
+      // پیکربندی Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyAVVcAhyYavi7T6y5rkkKkPRDKC02CSAs8",
+        authDomain: "ghorekeshibig.firebaseapp.com",
+        projectId: "ghorekeshibig",
+        storageBucket: "ghorekeshibig.firebasestorage.app",
+        messagingSenderId: "852435077441",
+        appId: "1:852435077441:web:d6a01fdadc63477776b9c0"
+      };
 
-    // راه اندازی Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+      // راه اندازی Firebase
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
 
-    // راه اندازی RecaptchaVerifier
-    const recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-      size: 'invisible',  // می‌توانید به 'normal' تغییر دهید تا recaptcha نمایان باشد
-      callback: function(response) {
-        // زمانیکه reCAPTCHA حل شود
-        console.log("reCAPTCHA solved!");
+      // راه اندازی RecaptchaVerifier
+      const recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+        size: 'invisible',  // می‌توانید به 'normal' تغییر دهید تا recaptcha نمایان باشد
+        callback: function(response) {
+          console.log("reCAPTCHA solved!");
+        }
+      });
+
+      // رندر کردن reCAPTCHA
+      recaptchaVerifier.render().then(function(widgetId) {
+        window.recaptchaWidgetId = widgetId;
+      });
+
+      // ارسال کد OTP
+      function sendVerificationCode() {
+        const phoneNumber = document.getElementById('phoneNumber').value;
+        const appVerifier = recaptchaVerifier;
+
+        auth.signInWithPhoneNumber(phoneNumber, appVerifier)
+          .then(function(confirmationResult) {
+            window.confirmationResult = confirmationResult;
+            console.log("OTP sent successfully!");
+
+            // هدایت به صفحه وارد کردن کد OTP
+            window.location.href = "verify.html";
+          })
+          .catch(function(error) {
+            console.error("Error during sign-in:", error);
+          });
       }
-    });
-
-    // رندر کردن reCAPTCHA
-    recaptchaVerifier.render().then(function(widgetId) {
-      window.recaptchaWidgetId = widgetId;
-    });
-
-    // ارسال کد OTP به شماره تلفن
-    function sendVerificationCode() {
-      const phoneNumber = document.getElementById('phoneNumber').value;
-      const appVerifier = recaptchaVerifier;
-
-      auth.signInWithPhoneNumber(phoneNumber, appVerifier)
-        .then(function(confirmationResult) {
-          // ذخیره نتیجه تایید برای استفاده بعدی (برای وارد کردن کد OTP)
-          window.confirmationResult = confirmationResult;
-          console.log("OTP sent successfully!");
-
-          // هدایت کاربر به صفحه وارد کردن کد OTP
-          window.location.href = "verify.html";
-        })
-        .catch(function(error) {
-          console.error("Error during sign-in:", error);
-        });
-    }
+    };
   </script>
 
 </body>
