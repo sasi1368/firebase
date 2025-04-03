@@ -51,6 +51,18 @@
           console.error("Error verifying OTP:", error);
         });
     }
+firebase.auth().signInWithPhoneNumber(phoneNumber, appVerifier)
+  .then((confirmationResult) => {
+    // کاربر کد را وارد کرد و احراز هویت شد
+    confirmationResult.confirm(code).then((result) => {
+      console.log("Login successful!", result.user);
+      window.location.href = "dashboard.html";  // تغییر مسیر به داشبورد
+    }).catch((error) => {
+      console.error("Error confirming the code:", error);
+    });
+  }).catch((error) => {
+    console.error("Error during sign-in:", error);
+  });
 
     // راه‌اندازی reCAPTCHA
     window.onload = function () {
