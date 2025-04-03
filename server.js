@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const path = require('path'); // برای استفاده از مسیریابی
 
 // راه‌اندازی Firebase Admin SDK با استفاده از کلید سرویس
-const serviceAccount = require('C:/Users/Saeed/Desktop/firebase/firebase-express-project/serviceAccountKey.json');
+const serviceAccount = require('./serviceAccountKey.json');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
