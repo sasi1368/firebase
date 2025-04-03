@@ -1,80 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Firebase Phone Authentication</title>
-
-  <!-- Firebase SDK (نسخه 8.10.0 برای مرورگر) -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-
-  <!-- reCAPTCHA SDK -->
-  <script src="https://www.gstatic.com/recaptcha/api.js?render=explicit"></script>
-
-  <style>
-    #recaptcha-container {
-      margin-top: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phone Authentication</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/recaptcha/api.js?render=explicit"></script>
 </head>
 <body>
+    <div id="recaptcha-container"></div>
+    <input type="text" id="phone-number" placeholder="Enter phone number">
+    <button id="send-button">Send Code</button>
 
-  <h2>Login with Phone Number</h2>
+    <script>
+        // Firebase initialization
+        const firebaseConfig = {
+            apiKey: "AIzaSyAVVcAhyYavi7T6y5rkkKkPRDKC02CSAs8",
+            authDomain: "ghorekeshibig.firebaseapp.com",
+            projectId: "ghorekeshibig",
+            storageBucket: "ghorekeshibig.appspot.com",
+            messagingSenderId: "852435077441",
+            appId: "1:852435077441:web:d6a01fdadc63477776b9c0"
+        };
+        firebase.initializeApp(firebaseConfig);
 
-  <input type="text" id="phoneNumber" placeholder="Enter phone number" />
-  <button onclick="sendVerificationCode()">Send OTP</button>
+        // Initialize reCAPTCHA
+        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+            size: 'invisible',
+            callback: function(response) {
+                // reCAPTCHA completed successfully
+                console.log("reCAPTCHA verified");
+            }
+        });
 
-  <div id="recaptcha-container"></div>
+        // Send verification code
+        function sendVerificationCode() {
+            const phoneNumber = document.getElementById('phone-number').value;
+            const appVerifier = window.recaptchaVerifier;
 
-  <script>
-    window.onload = function() {
-      // پیکربندی Firebase
-      const firebaseConfig = {
-        apiKey: "AIzaSyAVVcAhyYavi7T6y5rkkKkPRDKC02CSAs8",
-        authDomain: "ghorekeshibig.firebaseapp.com",
-        projectId: "ghorekeshibig",
-        storageBucket: "ghorekeshibig.firebasestorage.app",
-        messagingSenderId: "852435077441",
-        appId: "1:852435077441:web:d6a01fdadc63477776b9c0"
-      };
-
-      // راه اندازی Firebase
-      firebase.initializeApp(firebaseConfig);
-      const auth = firebase.auth();
-
-      // راه اندازی RecaptchaVerifier
-      const recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-        size: 'invisible',  // می‌توانید به 'normal' تغییر دهید تا recaptcha نمایان باشد
-        callback: function(response) {
-          console.log("reCAPTCHA solved!");
+            firebase.auth().signInWithPhoneNumber(phoneNumber, appVerifier)
+                .then(function(confirmationResult) {
+                    // Store the confirmation result to use it later
+                    window.confirmationResult = confirmationResult;
+                    alert("Verification code sent!");
+                })
+                .catch(function(error) {
+                    console.error("Error during phone number sign-in:", error);
+                    alert("Error sending verification code: " + error.message);
+                });
         }
-      });
 
-      // رندر کردن reCAPTCHA
-      recaptchaVerifier.render().then(function(widgetId) {
-        window.recaptchaWidgetId = widgetId;
-      });
-
-      // ارسال کد OTP
-      function sendVerificationCode() {
-        const phoneNumber = document.getElementById('phoneNumber').value;
-        const appVerifier = recaptchaVerifier;
-
-        auth.signInWithPhoneNumber(phoneNumber, appVerifier)
-          .then(function(confirmationResult) {
-            window.confirmationResult = confirmationResult;
-            console.log("OTP sent successfully!");
-
-            // هدایت به صفحه وارد کردن کد OTP
-            window.location.href = "verify.html";
-          })
-          .catch(function(error) {
-            console.error("Error during sign-in:", error);
-          });
-      }
-    };
-  </script>
-
+        // Attach the send verification code function to the button
+        document.getElementById('send-button').addEventListener('click', sendVerificationCode);
+    </script>
 </body>
 </html>
