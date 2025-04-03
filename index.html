@@ -4,17 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phone Authentication</title>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/recaptcha/api.js?render=explicit"></script>
-</head>
-<body>
-    <div id="recaptcha-container"></div>
-    <input type="text" id="phone-number" placeholder="Enter phone number">
-    <button id="send-button">Send Code</button>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 
-    <script>
-        // Firebase initialization
         const firebaseConfig = {
             apiKey: "AIzaSyAVVcAhyYavi7T6y5rkkKkPRDKC02CSAs8",
             authDomain: "ghorekeshibig.firebaseapp.com",
@@ -23,25 +17,25 @@
             messagingSenderId: "852435077441",
             appId: "1:852435077441:web:d6a01fdadc63477776b9c0"
         };
-        firebase.initializeApp(firebaseConfig);
 
-        // Initialize reCAPTCHA
-        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // بارگذاری و ایجاد reCAPTCHA
+        window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
             size: 'invisible',
             callback: function(response) {
-                // reCAPTCHA completed successfully
                 console.log("reCAPTCHA verified");
             }
-        });
+        }, auth);
 
-        // Send verification code
+        // ارسال کد تایید به شماره تلفن
         function sendVerificationCode() {
             const phoneNumber = document.getElementById('phone-number').value;
             const appVerifier = window.recaptchaVerifier;
 
-            firebase.auth().signInWithPhoneNumber(phoneNumber, appVerifier)
+            signInWithPhoneNumber(auth, phoneNumber, appVerifier)
                 .then(function(confirmationResult) {
-                    // Store the confirmation result to use it later
                     window.confirmationResult = confirmationResult;
                     alert("Verification code sent!");
                 })
@@ -51,8 +45,13 @@
                 });
         }
 
-        // Attach the send verification code function to the button
+        // اضافه کردن تابع برای دکمه
         document.getElementById('send-button').addEventListener('click', sendVerificationCode);
     </script>
+</head>
+<body>
+    <div id="recaptcha-container"></div>
+    <input type="text" id="phone-number" placeholder="Enter phone number">
+    <button id="send-button">Send Code</button>
 </body>
 </html>
